@@ -1,14 +1,52 @@
-import { Box, useTheme, IconButton } from "@mui/material";
+import {
+  Box,
+  useTheme,
+  IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  TextField,
+} from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { tokens } from "../../theme";
 import { mockDataInvoices } from "../../data/mockData";
 import Header from "../../components/Header";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
+import { useState } from "react";
+
 
 const Invoices = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+  
+  const [open, setOpen] = useState(false);
+  const [selectedRow, setSelectedRow] = useState(null);
+  const handleEdit = (row) => {
+    setSelectedRow(row);
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+    setSelectedRow(null);
+  };
+
+  const handleSave = () => {
+    console.log("Cập nhật dữ liệu:", selectedRow);
+    setOpen(false);
+  };
+
+  const handleDelete = (id) => {
+    console.log("Delete:", id);
+    // Thêm xác nhận hoặc gọi API xóa ở đây
+  };
+
+  const handleChange = (field, value) => {
+    setSelectedRow((prev) => ({ ...prev, [field]: value }));
+  };
   const columns = [
     { field: "id", headerName: "ID" },
     {
@@ -50,17 +88,6 @@ const Invoices = () => {
       ),
     },
   ];
-
-  const handleEdit = (id) => {
-    console.log("Edit:", id);
-    // 👉 Tại đây bạn có thể mở modal hoặc chuyển route edit
-  };
-
-  const handleDelete = (id) => {
-    console.log("Delete:", id);
-    // 👉 Có thể thêm confirm và gọi API xoá
-  };
-
   return (
     <Box m="20px">
       <Header title="Doanh thu ngày" subtitle="Dữ liệu đúng 99%" />
@@ -95,6 +122,43 @@ const Invoices = () => {
       >
         <DataGrid checkboxSelection rows={mockDataInvoices} columns={columns} />
       </Box>
+      {/* POPUP CHỈNH SỬA */}
+      <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
+        <DialogTitle>Chỉnh sửa dữ liệu</DialogTitle>
+        <DialogContent>
+          {selectedRow && (
+            <Box display="flex" flexDirection="column" gap={2} mt={1}>
+              <TextField
+                label="Phí Ads"
+                value={selectedRow.adsCosts}
+                onChange={(e) => handleChange("adsCosts", e.target.value)}
+              />
+              <TextField
+                label="Ngày"
+                value={selectedRow.createdTime}
+                onChange={(e) => handleChange("createdTime", e.target.value)}
+              />
+              <TextField
+                label="Lãi"
+                value={selectedRow.sumInterestAmount}
+                onChange={(e) =>
+                  handleChange("sumInterestAmount", e.target.value)
+                }
+              />
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose}>Hủy</Button>
+          <Button
+            onClick={handleSave}
+            variant="contained"
+            color="primary"
+          >
+            Lưu
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
